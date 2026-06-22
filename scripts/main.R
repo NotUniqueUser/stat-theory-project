@@ -8,6 +8,7 @@ library(scales)
 library(ggspatial)
 library(here)
 library(broom)
+library(pROC)
 
 pipeline_scripts <- c(
   "001_import.R",

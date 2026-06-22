@@ -8,13 +8,13 @@ library(ggspatial)
 library(here)
 
 # 1. Load the results from the hypothesis test script
-results_file <- here("data", "test_results.rds")
+results_file <- here("data", "clean.rds")
 if (!file.exists(results_file)) {
   stop("Test results RDS file not found! Please run 'scripts/003_hypothesis_tests.R' first.")
 }
 
-res_data <- read_rds(results_file)
-data_plot <- res_data$df_tested
+data_plot <- read_rds(results_file)
+#data_plot <- res_data$df_tested
 
 # 2. Load geographic map data
 israel_map <- ne_countries(scale = "medium", country = c("Israel", "Palestine"), returnclass = "sf")
@@ -71,17 +71,6 @@ plot <- ggplot() +
     values = c("Severe Accident" = "#e67e22", "Fatal Accident" = "#e74c3c")
   ) +
   
-  # Overlay Geographic Median Center
-  geom_point(
-    data = data.frame(X = median(data_plot$X), Y = median(data_plot$Y), Type = "Geographic Median Center"),
-    aes(x = X, y = Y, shape = Type),
-    color = "#2c3e50", fill = "#ffffff", size = 3.5, stroke = 1.5
-  ) +
-  scale_shape_manual(
-    name = "Spatial Benchmark",
-    values = c("Geographic Median Center" = 23)
-  ) +
-  
   # Guides formatting
   guides(
     fill = guide_colorbar(order = 1),
@@ -122,7 +111,7 @@ plot <- ggplot() +
   ) +
   
   labs(
-    title = "2024 Spatial Car Crash Intensity & Severity Map",
+    title = "2024 Spatial Car Accident Intensity & Severity Map",
     subtitle = "Overlay of Fatal/Severe events on overall accident density",
     x = "Easting (ITM Meters)",
     y = "Northing (ITM Meters)"
@@ -136,6 +125,8 @@ plot <- ggplot() +
     legend.box = "vertical",
     axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)
   )
+
+print(plot)
 
 dir.create(here("plots"), showWarnings = FALSE)
 ggsave(
