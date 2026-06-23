@@ -7,6 +7,21 @@ df <- read_rds(data_clean_path)
 header <- strrep("=", 15)
 cat(header, "Statistical Tests", header, "\n")
 
+# Individual chisq tests
+cat(header, "Individual chisq tests", header)
+
+chisq_road_state_weather <- chisq.test(table(data_clean$road_state, data_clean$weather))
+chisq_road <- chisq.test(table(data_clean$severity, data_clean$road_type))
+chisq_day_night <- chisq.test(table(data_clean$severity, data_clean$day_night))
+chisq_weather <- chisq.test(table(data_clean$severity, data_clean$weather))
+chisq_accident_type <- chisq.test(table(data_clean$severity, data_clean$accident_type))
+
+print(chisq_road_state_weather)
+print(chisq_road)
+print(chisq_day_night)
+print(chisq_weather)
+print(chisq_accident_type)
+
 # Logistic Regression
 cat(header, "Logistic Regression", header, "\n")
 
@@ -14,6 +29,7 @@ model <- glm(is_severe_or_fatal ~ day_night + weather + road_type + accident_typ
              data = df, family = binomial)
 print(summary(model))
 
+# Odd ratios
 cat(header, "Odd Ratios", header, "\n")
 odds_ratios <- exp(cbind(OR = coef(model), confint(model)))
 print(odds_ratios)
