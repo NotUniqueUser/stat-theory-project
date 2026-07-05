@@ -11,7 +11,7 @@ plot <- ggplot(data_clean, aes(x = road_type, fill = severity)) +
     palette = "Set2",
   ) +
   labs(
-    title = "Number of accidents by severity and road types",
+    #title = "Number of accidents by severity and road types",
     x = "Road Type",
     y = "Count"
   ) +
@@ -44,7 +44,7 @@ plot <- ggplot(roc_df, aes(x = FPR, y = Sensitivity)) +
   scale_x_continuous(limits = c(0, 1), expand = 0) +
   scale_y_continuous(limits = c(0, 1), expand = 0) +
   labs(
-    title = "ROC Curve for Accident Severity Predictor Model",
+    #title = "ROC Curve for Accident Severity Predictor Model",
     x = "False Positive Rate (1 - Specificity)",
     y = "True Positive Rate (Sensitivity)"
   ) +
@@ -79,7 +79,7 @@ plot <- ggplot(model_tidy, aes(x = estimate, y = term)) +
   geom_point(color = '#1f77b4', size = 3) +
   scale_x_log10() +
   labs(
-    title = "Model Odds Ratios & 95% Confidence Intervals",
+    #title = "Model Odds Ratios & 95% Confidence Intervals",
     x = "Odds ratios (Log Scale)",
     y = "Predictor Variable"
   ) +
@@ -97,16 +97,14 @@ ggsave(
 )
 
 # Calculate predicted probabilities for combinations
-predicted_prob <- res_data$predicted_prob
-
-plot_data <- aggregate(predicted_prob ~ road_type + weather, data = data_clean, FUN = mean)
+plot_data <- aggregate(predicted_prob ~ road_type + weather, data = res_data$test_data, FUN = mean)
 
 plot <- ggplot(plot_data, aes(x = weather, y = predicted_prob, group = road_type, color = road_type)) +
   geom_line(size = 1.2) +
   geom_point(size = 3) +
   scale_x_discrete(expand = 0) +
   labs(
-    title = "Interaction Effect: How Weather Impacts Severity across Road Types",
+    #title = "Interaction Effect: How Weather Impacts Severity across Road Types",
     x = "Weather Condition",
     y = "Mean Predicted Probability of Severe/Fatal Crash",
     color = "Road Type"
@@ -123,5 +121,66 @@ ggsave(
   plot = plot,
   width = 8,
   height = 6,
+  dpi = 300
+)
+
+plot_data <- aggregate(predicted_prob ~ road_type + accident_type, data = res_data$test_data, FUN = mean)
+
+plot <- ggplot(plot_data, aes(x = accident_type, y = predicted_prob, group = road_type, color = road_type)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  scale_x_discrete(expand = 0) +
+  labs(
+    #title = "Interaction Effect: How Accident Type Impacts Severity across Road Types",
+    x = "Accident type",
+    y = "Mean Predicted Probability of Severe/Fatal Crash",
+    color = "Road Type"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5),
+        legend.position = "bottom",
+        aspect.ratio = 2)
+
+print(plot)
+
+ggsave(
+  filename = paste0(plots_dir, "/interaction_accident.png"),
+  plot = plot,
+  width = 8,
+  height = 6,
+  dpi = 300
+)
+
+# Plot correlation table
+cor_vars <- c("severity", "road_type", "is_urban", "day_night", "weather", "road_state", "accident_type")
+n_vars <- length(cor_vars)
+assoc_mat <- matrix(NA, nrow = n_vars, ncol = n_vars, dimnames = list(cor_vars, cor_vars))
+
+# Loop through and compute Cramer's V for each pair
+for (i in 1:n_vars) {
+  for (j in 1:n_vars) {
+    tbl <- table(data_clean[[cor_vars[i]]], data_clean[[cor_vars[j]]])
+    assoc_mat[i, j] <- assocstats(tbl)$cramer
+  }
+}
+
+plot <- ggcorrplot(
+  assoc_mat,
+  type = "full",
+  method = "square",
+  lab = TRUE,
+  colors = c("white", "orange", "darkred"),
+  ggtheme = theme_bw()
+) + 
+  scale_fill_gradient2(limit = c(0, 1), low = "white", high = "darkred", mid = "orange", midpoint = 0.5) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+print(plot)
+
+ggsave(
+  filename = paste0(plots_dir, "/correlation_heatmap.png"),
+  plot = plot,
+  width = 8,
+  height = 8,
   dpi = 300
 )

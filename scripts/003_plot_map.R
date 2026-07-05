@@ -52,7 +52,7 @@ plot <- ggplot() +
   # Layer for Severe accidents (Orange dots)
   geom_point(
     data = severe_points,
-    aes(x = X, y = Y, color = "Severe Accident"),
+    aes(x = X, y = Y, color = "Severe Accident", shape = road_type),
     size = 0.8,
     alpha = 0.35
   ) +
@@ -111,8 +111,8 @@ plot <- ggplot() +
   ) +
   
   labs(
-    title = "2024 Spatial Car Accident Intensity & Severity Map",
-    subtitle = "Overlay of Fatal/Severe events on overall accident density",
+    #title = "2024 Spatial Car Accident Intensity & Severity Map",
+    #subtitle = "Overlay of Fatal/Severe events on overall accident density",
     x = "Easting (ITM Meters)",
     y = "Northing (ITM Meters)"
   ) +
